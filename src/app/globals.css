@@ -1,0 +1,209 @@
+@import "tailwindcss";
+
+/* ---------------------------------------------------------------------
+   JKUAT Towers design tokens
+   ink      — near-navy-black, primary text/surfaces
+   paper    — cool off-white background
+   signal   — commerce green (search, orders, money)
+   violet   — reserved ONLY for AI/assistant-touched surfaces
+   amber    — stock/attention states
+------------------------------------------------------------------------ */
+@theme {
+  --color-ink: #0b1121;
+  --color-ink-soft: #4b5468;
+  --color-paper: #f6f7fb;
+  --color-surface: #ffffff;
+  --color-line: #e6e8f0;
+
+  --color-signal-50: #ecfdf5;
+  --color-signal-100: #d1fae5;
+  --color-signal-500: #059669;
+  --color-signal-600: #047857;
+  --color-signal-900: #064e3b;
+
+  --color-violet-50: #f2f0ff;
+  --color-violet-100: #e5e1ff;
+  --color-violet-500: #6d5ef5;
+  --color-violet-600: #5a4bdb;
+
+  --color-amber-50: #fffbeb;
+  --color-amber-500: #f59e0b;
+
+  --font-display: var(--font-display);
+  --font-body: var(--font-body);
+  --font-mono: var(--font-mono);
+
+  --shadow-card: 0 1px 2px rgba(11, 17, 33, 0.04), 0 8px 24px -12px rgba(11, 17, 33, 0.12);
+  --shadow-card-hover: 0 4px 8px rgba(11, 17, 33, 0.06), 0 16px 32px -12px rgba(11, 17, 33, 0.18);
+  --shadow-plaque: inset 0 1px 0 rgba(255, 255, 255, 0.4), 0 1px 2px rgba(11, 17, 33, 0.15);
+}
+
+@media (prefers-color-scheme: dark) {
+  /* Reserved for a future dark mode; app currently ships light-only by design. */
+}
+
+* {
+  border-color: var(--color-line);
+}
+
+body {
+  background: var(--color-paper);
+  color: var(--color-ink);
+  font-family: var(--font-body), Arial, Helvetica, sans-serif;
+}
+
+h1, h2, h3, h4 {
+  font-family: var(--font-display), var(--font-body), sans-serif;
+  letter-spacing: -0.01em;
+}
+
+.font-tabular {
+  font-family: var(--font-mono), monospace;
+  font-variant-numeric: tabular-nums;
+}
+
+@layer components {
+  .input {
+    width: 100%;
+    background: var(--color-surface);
+    border: 1.5px solid var(--color-line);
+    border-radius: 0.75rem;
+    padding: 0.625rem 0.875rem;
+    font-size: 0.875rem;
+    outline: none;
+    transition: border-color 150ms ease, box-shadow 150ms ease;
+  }
+  .input:focus {
+    border-color: var(--color-ink);
+    box-shadow: 0 0 0 3px rgba(11, 17, 33, 0.06);
+  }
+  .input::placeholder {
+    color: #9ca3af;
+  }
+
+  .card {
+    background: var(--color-surface);
+    border: 1px solid var(--color-line);
+    border-radius: 1rem;
+    box-shadow: var(--shadow-card);
+  }
+
+  .card-interactive {
+    transition: transform 200ms cubic-bezier(0.16, 1, 0.3, 1), box-shadow 200ms ease, border-color 200ms ease;
+  }
+  .card-interactive:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-card-hover);
+    border-color: #d7dae6;
+  }
+
+  /* The signature element: a die-cut shop plaque, echoing the physical
+     numbered plates on real shop doors in the building. */
+  .shop-plaque {
+    font-family: var(--font-mono), monospace;
+    font-weight: 500;
+    font-size: 0.6875rem;
+    letter-spacing: 0.02em;
+    color: var(--color-ink);
+    background: linear-gradient(180deg, #fdfdfd 0%, #eef0f5 100%);
+    border: 1px solid var(--color-line);
+    border-radius: 0.375rem;
+    padding: 0.125rem 0.5rem;
+    box-shadow: var(--shadow-plaque);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    white-space: nowrap;
+  }
+
+  .btn-primary {
+    background: var(--color-ink);
+    color: white;
+    border-radius: 0.75rem;
+    padding: 0.625rem 1.25rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    transition: transform 150ms ease, background 150ms ease, box-shadow 150ms ease;
+  }
+  .btn-primary:hover {
+    background: #1a2138;
+  }
+  .btn-primary:active {
+    transform: scale(0.98);
+  }
+  .btn-primary:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+
+  .btn-secondary {
+    background: var(--color-surface);
+    color: var(--color-ink);
+    border: 1.5px solid var(--color-line);
+    border-radius: 0.75rem;
+    padding: 0.625rem 1.25rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    transition: border-color 150ms ease, background 150ms ease;
+  }
+  .btn-secondary:hover {
+    background: var(--color-paper);
+    border-color: #c9cee0;
+  }
+
+  .btn-ai {
+    background: var(--color-violet-500);
+    color: white;
+    border-radius: 0.75rem;
+    padding: 0.625rem 1.25rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    transition: background 150ms ease, transform 150ms ease;
+  }
+  .btn-ai:hover {
+    background: var(--color-violet-600);
+  }
+  .btn-ai:active {
+    transform: scale(0.98);
+  }
+
+  .chip {
+    border-radius: 999px;
+    border: 1.5px solid var(--color-line);
+    background: var(--color-surface);
+    padding: 0.5rem 1rem;
+    font-size: 0.8125rem;
+    font-weight: 500;
+    color: var(--color-ink-soft);
+    transition: border-color 150ms ease, color 150ms ease, background 150ms ease;
+    white-space: nowrap;
+  }
+  .chip:hover {
+    border-color: var(--color-ink);
+    color: var(--color-ink);
+  }
+  .chip[data-active="true"] {
+    background: var(--color-ink);
+    border-color: var(--color-ink);
+    color: white;
+  }
+}
+
+/* Vendor storefront ticker (src/components/storefront/StorefrontTicker.tsx) —
+   duplicates its item row and loops it to -50% for a seamless scroll. */
+@keyframes storefront-ticker {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+.animate-storefront-ticker {
+  animation: storefront-ticker 32s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

@@ -1,0 +1,455 @@
+// JKUAT Towers Commerce Network — data model
+// Layers: Discovery -> Commerce -> Customer Relationship -> Vendor AI Business OS -> Building Network
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ---------------------------------------------------------------------------
+// BUILDING
+// ---------------------------------------------------------------------------
+
+model Building {
+  id        String   @id @default(cuid())
+  name      String
+  address   String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  floors Floor[]
+  shops  Shop[]
+  deals  Deal[]
+  assistantSessions AssistantSession[]
+}
+
+model Floor {
+  id         String @id @default(cuid())
+  buildingId String
+  building   Building @relation(fields: [buildingId], references: [id])
+  label      String // e.g. "Floor 3", "Ground Floor"
+  order      Int      @default(0)
+
+  shops Shop[]
+
+  @@unique([buildingId, label])
+}
+
+// ---------------------------------------------------------------------------
+// SHOP / VENDOR
+// ---------------------------------------------------------------------------
+
+enum ShopPlan {
+  FREE
+  GROWTH
+  PRO
+}
+
+model Shop {
+  id         String   @id @default(cuid())
+  buildingId String
+  building   Building @relation(fields: [buildingId], references: [id])
+  floorId    String?
+  floor      Floor?   @relation(fields: [floorId], references: [id])
+
+  shopNumber String // physical shop/stall number, e.g. "Shop 21"
+  name       String
+  category   String // Perfume, Fashion, Electronics, Services, etc.
+  slug       String   @unique
+  // Simple MVP auth: knowing this token is what grants access to the vendor
+  // dashboard. Kept as the actual scoping key for dashboard API routes;
+  // clerkUserId (below) is what gates the human-facing /dashboard pages.
+  dashboardToken String @unique @default(cuid())
+  // Clerk user id of the vendor who owns this shop. Nullable so
+  // pre-Clerk/seeded shops keep working via dashboardToken alone until
+  // claimed — see /dashboard/[token]'s "claim this dashboard" flow.
+  clerkUserId String? @unique
+
+  ownerName    String?
+  phone        String
+  whatsapp     String?
+  email        String?
+  openingHours String? // free text for MVP, e.g. "Mon-Sat 8am-7pm"
+
+  paymentMethods String[] // ["mpesa", "cash", "card", "bank"]
+  deliveryAreas  String[] // free text areas served
+  returnPolicy   String?
+
+  brandVoice      String? // tone guidance the AI should write in
+  aboutBusiness   String?
+  logoUrl         String?
+  // Vendor-selected accent color (hex, e.g. "#3452FF") for their public
+  // storefront — drives the nav CTA, ticker highlights, product-card
+  // accents, price, and footer link color. Nullable so existing/unset
+  // shops fall back to their template's built-in default accent.
+  themeColor      String?
+  plan            ShopPlan @default(FREE)
+  isActive        Boolean  @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  products      Product[]
+  services      Service[]
+  customers     Customer[]
+  orders        Order[]
+  conversations Conversation[]
+  quotations    Quotation[]
+  invoices      Invoice[]
+  proposals     Proposal[]
+  automations   AutomationRule[]
+  pricingRules  PricingRule[]
+  deals         Deal[]
+
+  @@index([buildingId])
+  @@index([category])
+}
+
+// ---------------------------------------------------------------------------
+// PRODUCTS & SERVICES
+// ---------------------------------------------------------------------------
+
+model Product {
+  id          String   @id @default(cuid())
+  shopId      String
+  shop        Shop     @relation(fields: [shopId], references: [id])
+  name        String
+  description String?
+  brand       String?
+  category    String?
+  tags        String[]
+  price       Decimal  @db.Decimal(10, 2)
+  stock       Int      @default(0)
+  images      String[]
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  orderItems  OrderItem[]
+  quoteItems  QuotationItem[]
+  invoiceItems InvoiceItem[]
+
+  @@index([shopId])
+  @@index([category])
+  @@index([name])
+}
+
+model Service {
+  id          String  @id @default(cuid())
+  shopId      String
+  shop        Shop    @relation(fields: [shopId], references: [id])
+  name        String // e.g. "Phone screen replacement", "Tailoring"
+  description String?
+  price       Decimal? @db.Decimal(10, 2)
+  isActive    Boolean  @default(true)
+
+  @@index([shopId])
+}
+
+// Bulk / wholesale pricing rules the AI can apply when drafting quotations
+model PricingRule {
+  id          String  @id @default(cuid())
+  shopId      String
+  shop        Shop    @relation(fields: [shopId], references: [id])
+  description String // e.g. "100+ units -> KSh 2,500 each"
+  minQuantity Int
+  unitPrice   Decimal @db.Decimal(10, 2)
+  productId   String?
+
+  @@index([shopId])
+}
+
+// ---------------------------------------------------------------------------
+// CUSTOMERS
+// ---------------------------------------------------------------------------
+
+model Customer {
+  id        String   @id @default(cuid())
+  shopId    String
+  shop      Shop     @relation(fields: [shopId], references: [id])
+  name      String?
+  phone     String
+  email     String?
+  notes     String?
+  lastSeenAt DateTime?
+  createdAt DateTime @default(now())
+
+  orders        Order[]
+  conversations Conversation[]
+  quotations    Quotation[]
+  invoices      Invoice[]
+
+  @@unique([shopId, phone])
+}
+
+// ---------------------------------------------------------------------------
+// COMMERCE: ORDERS / RESERVATIONS
+// ---------------------------------------------------------------------------
+
+enum OrderStatus {
+  PENDING
+  RESERVED
+  CONFIRMED
+  READY_FOR_PICKUP
+  OUT_FOR_DELIVERY
+  COMPLETED
+  CANCELLED
+}
+
+enum FulfillmentType {
+  PICKUP
+  RESERVE_AND_COLLECT
+  DELIVERY
+}
+
+model Order {
+  id          String          @id @default(cuid())
+  shopId      String
+  shop        Shop            @relation(fields: [shopId], references: [id])
+  customerId  String?
+  customer    Customer?       @relation(fields: [customerId], references: [id])
+  status      OrderStatus     @default(PENDING)
+  fulfillment FulfillmentType @default(PICKUP)
+  totalAmount Decimal         @db.Decimal(10, 2)
+  reservedUntil DateTime?
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+
+  items OrderItem[]
+
+  @@index([shopId])
+  @@index([customerId])
+}
+
+model OrderItem {
+  id        String  @id @default(cuid())
+  orderId   String
+  order     Order   @relation(fields: [orderId], references: [id])
+  productId String
+  product   Product @relation(fields: [productId], references: [id])
+  quantity  Int
+  unitPrice Decimal @db.Decimal(10, 2)
+}
+
+// ---------------------------------------------------------------------------
+// AI BUSINESS BRAIN: CONVERSATIONS
+// ---------------------------------------------------------------------------
+
+enum ConversationChannel {
+  WHATSAPP
+  WEB
+}
+
+enum MessageSender {
+  CUSTOMER
+  AI
+  VENDOR
+}
+
+model Conversation {
+  id         String              @id @default(cuid())
+  shopId     String
+  shop       Shop                @relation(fields: [shopId], references: [id])
+  customerId String?
+  customer   Customer?           @relation(fields: [customerId], references: [id])
+  channel    ConversationChannel @default(WHATSAPP)
+  isHandedOffToVendor Boolean    @default(false)
+  createdAt  DateTime            @default(now())
+  updatedAt  DateTime            @updatedAt
+
+  messages Message[]
+
+  @@index([shopId])
+}
+
+model Message {
+  id             String        @id @default(cuid())
+  conversationId String
+  conversation   Conversation  @relation(fields: [conversationId], references: [id])
+  sender         MessageSender
+  body           String
+  createdAt      DateTime      @default(now())
+
+  @@index([conversationId])
+}
+
+// ---------------------------------------------------------------------------
+// AI BUSINESS BRAIN: DOCUMENTS
+// ---------------------------------------------------------------------------
+
+enum DocumentStatus {
+  DRAFT
+  SENT
+  ACCEPTED
+  PAID
+  CANCELLED
+}
+
+model Quotation {
+  id          String         @id @default(cuid())
+  shopId      String
+  shop        Shop           @relation(fields: [shopId], references: [id])
+  customerId  String?
+  customer    Customer?      @relation(fields: [customerId], references: [id])
+  reference   String         @unique
+  status      DocumentStatus @default(DRAFT)
+  subtotal    Decimal        @db.Decimal(10, 2)
+  discount    Decimal        @default(0) @db.Decimal(10, 2)
+  deliveryFee Decimal        @default(0) @db.Decimal(10, 2)
+  total       Decimal        @db.Decimal(10, 2)
+  notes       String?
+  createdAt   DateTime       @default(now())
+
+  items QuotationItem[]
+
+  @@index([shopId])
+}
+
+model QuotationItem {
+  id          String    @id @default(cuid())
+  quotationId String
+  quotation   Quotation @relation(fields: [quotationId], references: [id])
+  productId   String?
+  product     Product?  @relation(fields: [productId], references: [id])
+  description String
+  quantity    Int
+  unitPrice   Decimal   @db.Decimal(10, 2)
+}
+
+model Invoice {
+  id          String         @id @default(cuid())
+  shopId      String
+  shop        Shop           @relation(fields: [shopId], references: [id])
+  customerId  String?
+  customer    Customer?      @relation(fields: [customerId], references: [id])
+  reference   String         @unique
+  status      DocumentStatus @default(DRAFT)
+  subtotal    Decimal        @db.Decimal(10, 2)
+  total       Decimal        @db.Decimal(10, 2)
+  dueDate     DateTime?
+  createdAt   DateTime       @default(now())
+
+  items InvoiceItem[]
+
+  @@index([shopId])
+}
+
+model InvoiceItem {
+  id          String  @id @default(cuid())
+  invoiceId   String
+  invoice     Invoice @relation(fields: [invoiceId], references: [id])
+  productId   String?
+  product     Product? @relation(fields: [productId], references: [id])
+  description String
+  quantity    Int
+  unitPrice   Decimal @db.Decimal(10, 2)
+}
+
+model Proposal {
+  id        String   @id @default(cuid())
+  shopId    String
+  shop      Shop     @relation(fields: [shopId], references: [id])
+  title     String
+  clientName String?
+  content   String   // generated proposal body (markdown/html)
+  createdAt DateTime @default(now())
+
+  @@index([shopId])
+}
+
+// ---------------------------------------------------------------------------
+// AUTOMATION (follow-ups, reminders)
+// ---------------------------------------------------------------------------
+
+enum AutomationTrigger {
+  NEW_LEAD
+  QUOTATION_SENT
+  ABANDONED_ORDER
+  UNPAID_INVOICE
+  POST_PURCHASE
+  REPEAT_PURCHASE_REMINDER
+}
+
+model AutomationRule {
+  id            String            @id @default(cuid())
+  shopId        String
+  shop          Shop              @relation(fields: [shopId], references: [id])
+  trigger       AutomationTrigger
+  delayHours    Int
+  messageTemplate String
+  isActive      Boolean           @default(true)
+
+  @@index([shopId])
+}
+
+// ---------------------------------------------------------------------------
+// CONTACT US
+// ---------------------------------------------------------------------------
+// Simple inbox for the public /contact form — not tied to any shop, so it
+// lives at the top level like Building/AssistantSession rather than under Shop.
+
+model ContactMessage {
+  id        String   @id @default(cuid())
+  name      String
+  email     String
+  subject   String
+  message   String
+  createdAt DateTime @default(now())
+}
+// The customer-facing assistant (src/lib/assistant-core.ts) searches across
+// every shop, not one — so unlike Conversation/Message above (which are
+// per-shop vendor↔customer threads), a WhatsApp assistant session is scoped
+// to the building and keyed by the customer's WhatsApp number, so replies
+// stay in context across messages without a browser tab holding state.
+
+enum AssistantMessageRole {
+  USER
+  ASSISTANT
+}
+
+model AssistantSession {
+  id            String   @id @default(cuid())
+  buildingId    String
+  building      Building @relation(fields: [buildingId], references: [id])
+  customerPhone String // WhatsApp "wa_id", e.g. "2547XXXXXXXX"
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  messages AssistantMessage[]
+
+  @@unique([buildingId, customerPhone])
+}
+
+model AssistantMessage {
+  id        String               @id @default(cuid())
+  sessionId String
+  session   AssistantSession     @relation(fields: [sessionId], references: [id])
+  role      AssistantMessageRole
+  body      String
+  createdAt DateTime             @default(now())
+
+  @@index([sessionId])
+}
+
+// ---------------------------------------------------------------------------
+// BUILDING-WIDE DEALS
+// ---------------------------------------------------------------------------
+
+model Deal {
+  id          String   @id @default(cuid())
+  buildingId  String
+  building    Building @relation(fields: [buildingId], references: [id])
+  shopId      String
+  shop        Shop     @relation(fields: [shopId], references: [id])
+  title       String
+  description String?
+  startsAt    DateTime @default(now())
+  endsAt      DateTime?
+  isFeatured  Boolean  @default(false)
+
+  @@index([buildingId])
+  @@index([shopId])
+}
