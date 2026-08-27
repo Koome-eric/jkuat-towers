@@ -56,7 +56,7 @@ export default function BrainChat({ dashboardToken }: { dashboardToken: string }
   }
 
   return (
-    <div className="card flex flex-col h-[560px] overflow-hidden">
+    <div className="card flex flex-col h-[440px] sm:h-[560px] overflow-hidden">
       <div className="px-5 py-3.5 border-b border-line flex items-center gap-2 bg-violet-50/60">
         <span className="w-2 h-2 rounded-full bg-violet-500" />
         <h2 className="font-semibold text-sm">AI Business Assistant</h2>

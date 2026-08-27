@@ -72,8 +72,8 @@ export default function AssistantPage() {
   }
 
   return (
-    <main className="min-h-screen bg-paper flex flex-col">
-      <header className="bg-violet-500 text-white px-6 py-4 flex items-center justify-between shrink-0">
+    <main className="h-dvh bg-paper flex flex-col overflow-hidden">
+      <header className="bg-violet-500 text-white px-4 sm:px-6 py-3.5 sm:py-4 flex items-center justify-between shrink-0">
         <div>
           <Link href="/" className="text-xs text-white/70 hover:text-white transition-colors">
             ← JKUAT Towers
@@ -169,6 +169,7 @@ export default function AssistantPage() {
           sendMessage(input);
         }}
         className="border-t border-line bg-white px-4 py-3 shrink-0"
+        style={{ paddingBottom: "max(0.75rem, env(safe-area-inset-bottom))" }}
       >
         <div className="max-w-2xl mx-auto flex gap-2">
           <input

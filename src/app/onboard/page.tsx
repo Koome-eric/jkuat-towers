@@ -144,9 +144,9 @@ export default function OnboardPage() {
         <p className="text-ink-soft mt-1">Get your digital shop live in about 5 minutes — free to start.</p>
 
         {/* Step indicator */}
-        <div className="flex items-center gap-2 mt-8 mb-2">
+        <div className="flex items-center gap-1.5 sm:gap-2 mt-8 mb-2">
           {STEPS.map((label, i) => (
-            <div key={label} className="flex-1">
+            <div key={label} className="flex-1 min-w-0">
               <div className="h-1.5 rounded-full bg-line overflow-hidden">
                 <motion.div
                   className="h-full bg-ink rounded-full"
@@ -155,14 +155,19 @@ export default function OnboardPage() {
                   transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
                 />
               </div>
-              <p className={`text-xs mt-1.5 transition-colors ${i === step ? "text-ink font-medium" : "text-neutral-400"}`}>
+              <p
+                className={`hidden sm:block text-xs mt-1.5 truncate transition-colors ${i === step ? "text-ink font-medium" : "text-neutral-400"}`}
+              >
                 {label}
               </p>
             </div>
           ))}
         </div>
+        <p className="sm:hidden text-xs font-medium text-ink mb-2">
+          Step {step + 1} of {STEPS.length} · {STEPS[step]}
+        </p>
 
-        <div className="card p-6 sm:p-8 mt-6 overflow-hidden">
+        <div className="card p-5 sm:p-8 mt-6 overflow-hidden">
           <AnimatePresence mode="wait" custom={direction}>
             <motion.div
               key={step}
