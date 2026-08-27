@@ -51,7 +51,7 @@ export default function HomeTemplate({ shop, products, deals = [], highlightProd
   };
 
   return (
-    <div style={{ background: BG, color: INK, fontFamily: "var(--font-body)" }} className="min-h-screen -mx-6 sm:-mx-0">
+    <div style={{ background: BG, color: INK, fontFamily: "var(--font-body)" }} className="min-h-screen w-full overflow-x-hidden">
       <ScrollToHighlight id={highlightProductId} />
       <StorefrontNav
         palette={palette}

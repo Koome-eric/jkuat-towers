@@ -25,7 +25,7 @@ export function StorefrontTicker({ items, palette }: { items: TickerItem[]; pale
 
   return (
     <div
-      className="overflow-hidden border-b -mx-6 sm:mx-0"
+      className="overflow-hidden border-b w-full"
       style={
         {
           background: palette.ink,

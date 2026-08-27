@@ -22,24 +22,24 @@ export function StorefrontNav({
 }) {
   return (
     <header
-      className="sticky top-0 z-40 backdrop-blur -mx-6 px-6 sm:mx-0 sm:px-0"
+      className="sticky top-0 z-40 backdrop-blur w-full"
       style={{
         background: `color-mix(in srgb, ${palette.bg} 88%, transparent)`,
         borderBottom: `1px solid ${palette.line}`,
       }}
     >
-      <div className="max-w-5xl mx-auto h-16 flex items-center justify-between gap-4">
+      <div className="max-w-5xl mx-auto h-auto min-h-16 px-4 py-3 sm:px-6 sm:py-0 flex items-center justify-between gap-3 sm:gap-4">
         <Link
           href="/"
-          className="text-xs tracking-widest uppercase shrink-0 hover:opacity-70 transition-opacity"
+          className="text-[10px] sm:text-xs tracking-widest uppercase shrink-0 hover:opacity-70 transition-opacity"
           style={{ color: palette.soft }}
         >
           ← JKUAT Towers
         </Link>
 
-        <div className="flex items-center gap-2.5 min-w-0">
+        <div className="flex items-center gap-2.5 min-w-0 flex-1 justify-center">
           <span
-            className="text-base sm:text-lg truncate leading-none"
+            className="text-sm sm:text-lg truncate leading-none"
             style={{ fontFamily: palette.displayFont, color: palette.ink, fontWeight: 600 }}
           >
             {shopName}
@@ -64,7 +64,7 @@ export function StorefrontNav({
             {ctaLabel}
           </a>
         ) : (
-          <span />
+          <span className="w-0 sm:w-auto" aria-hidden="true" />
         )}
       </div>
     </header>

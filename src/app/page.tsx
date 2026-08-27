@@ -47,7 +47,7 @@ export default async function HomePage() {
   if (!tickerItems.length) tickerItems.push({ label: "Shops listing soon", tone: "open" });
 
   return (
-    <main className="min-h-screen">
+    <main className="min-h-screen overflow-x-hidden">
       <SiteNav />
 
       {/* ------------------------------------------------------------------ */}
@@ -61,34 +61,34 @@ export default async function HomePage() {
             backgroundSize: "28px 28px",
           }}
         />
-        <div className="relative max-w-5xl mx-auto px-6 pt-16 pb-20 sm:pt-24 sm:pb-28">
-          <div className="grid lg:grid-cols-[1fr_320px] gap-12 lg:gap-16 items-center">
-            <div>
+        <div className="relative max-w-5xl mx-auto px-4 pt-12 pb-16 sm:px-6 sm:pt-16 sm:pb-20 lg:pt-24 lg:pb-28">
+          <div className="grid gap-8 lg:grid-cols-[1fr_320px] lg:gap-12 xl:gap-16 items-center">
+            <div className="min-w-0">
               <Reveal>
-                <div className="inline-flex items-center gap-2 shop-plaque bg-white/10 border-white/20 text-white mb-7">
-                  <MapPin size={12} />
-                  Nairobi CBD · {shops.length} shops live now
+                <div className="inline-flex max-w-full items-center gap-2 shop-plaque bg-white/10 border-white/20 text-white mb-7 whitespace-normal text-left">
+                  <MapPin size={12} className="shrink-0" />
+                  <span className="break-words">Nairobi CBD · {shops.length} shops live now</span>
                 </div>
               </Reveal>
 
               <Reveal delay={0.05}>
-                <h1 className="text-4xl sm:text-6xl font-semibold leading-[1.05] max-w-xl">
+                <h1 className="text-3xl sm:text-5xl lg:text-6xl font-semibold leading-[1.05] max-w-xl break-words">
                   Every shop in the building.
                   <span className="block text-white/50">One search away.</span>
                 </h1>
               </Reveal>
 
               <Reveal delay={0.1}>
-                <p className="text-white/60 mt-5 max-w-md text-base sm:text-lg leading-relaxed">
+                <p className="text-white/60 mt-5 max-w-md text-sm sm:text-base lg:text-lg leading-relaxed break-words">
                   {building?.name ?? "JKUAT Towers"} lists every vendor&apos;s inventory in one place —
                   search once, message the shop that has it, walk over and buy it.
                 </p>
               </Reveal>
 
               <Reveal delay={0.15}>
-                <div className="mt-8 flex flex-col sm:flex-row gap-3 max-w-xl">
-                  <form action="/search" className="flex-1 flex gap-2">
-                    <div className="relative flex-1">
+                <div className="mt-8 flex flex-col gap-3 max-w-xl sm:flex-row">
+                  <form action="/search" className="flex-1 flex flex-col gap-2 sm:flex-row">
+                    <div className="relative flex-1 min-w-0">
                       <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-neutral-400" />
                       <input
                         name="q"
@@ -96,11 +96,11 @@ export default async function HomePage() {
                         className="w-full rounded-xl pl-10 pr-4 py-3.5 text-ink bg-white placeholder:text-neutral-400 outline-none ring-0 focus:ring-2 focus:ring-signal-500 transition-shadow text-sm"
                       />
                     </div>
-                    <button className="btn-primary bg-signal-500 hover:bg-signal-600 px-5 shrink-0">Search</button>
+                    <button className="btn-primary bg-signal-500 hover:bg-signal-600 px-5 shrink-0 w-full sm:w-auto">Search</button>
                   </form>
                   <Link
                     href="/assistant"
-                    className="btn-ai flex items-center justify-center gap-1.5 shrink-0"
+                    className="btn-ai flex items-center justify-center gap-1.5 shrink-0 w-full sm:w-auto"
                   >
                     <Sparkles size={15} />
                     Ask the AI
@@ -111,15 +111,15 @@ export default async function HomePage() {
               <Reveal delay={0.2}>
                 <Link
                   href="/onboard"
-                  className="inline-flex items-center gap-1.5 mt-8 text-sm text-white/50 hover:text-white transition-colors"
+                  className="inline-flex items-center gap-1.5 mt-8 text-sm text-white/50 hover:text-white transition-colors break-words"
                 >
                   Own a shop here? List it free
-                  <ArrowRight size={14} />
+                  <ArrowRight size={14} className="shrink-0" />
                 </Link>
               </Reveal>
             </div>
 
-            <Reveal delay={0.1} className="w-full">
+            <Reveal delay={0.1} className="w-full min-w-0">
               <BuildingIndexPanel
                 stats={[
                   { label: "Shops", value: String(shops.length) },

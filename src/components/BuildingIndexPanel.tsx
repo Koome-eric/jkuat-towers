@@ -21,8 +21,8 @@ export function BuildingIndexPanel({
   const row = ticker.length ? [...ticker, ...ticker] : [];
 
   return (
-    <div className="rounded-2xl overflow-hidden border border-white/10 bg-white/[0.04] backdrop-blur-sm">
-      <div className="flex items-center justify-between px-5 py-3 border-b border-white/10">
+    <div className="w-full rounded-2xl overflow-hidden border border-white/10 bg-white/[0.04] backdrop-blur-sm">
+      <div className="flex items-center justify-between px-4 py-3 border-b border-white/10 sm:px-5">
         <span className="text-[10px] font-tabular tracking-[0.2em] uppercase text-white/45">Building Index</span>
         <span className="flex items-center gap-1.5 text-[10px] font-tabular tracking-wider text-signal-500">
           <span className="relative flex h-1.5 w-1.5">
@@ -37,10 +37,10 @@ export function BuildingIndexPanel({
         {stats.map((s, i) => (
           <div
             key={s.label}
-            className={`p-5 ${i > 0 ? "border-l border-white/10" : ""}`}
+            className={`p-3 sm:p-5 ${i > 0 ? "border-l border-white/10" : ""}`}
           >
-            <p className="font-tabular text-2xl text-white leading-none">{s.value}</p>
-            <p className="text-[9.5px] tracking-widest uppercase text-white/40 mt-2">{s.label}</p>
+            <p className="font-tabular text-xl sm:text-2xl text-white leading-none">{s.value}</p>
+            <p className="text-[8.5px] sm:text-[9.5px] tracking-widest uppercase text-white/40 mt-2">{s.label}</p>
           </div>
         ))}
       </div>
